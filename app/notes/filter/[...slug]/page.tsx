@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { NoteTag } from '@/types/note';
 import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { fetchNotes } from "@/lib/api/api";
+import { fetchNotes } from '@/lib/api/serverApi';
+import { cookies } from 'next/headers';
 import NotesClient from './Notes.client';
 import type { Metadata } from 'next';
 
@@ -72,9 +73,11 @@ export default async function FilterPage({ params }: Props) {
     const page = 1;
     const search = '';
 
+    const cookieStore = cookies();
+
     await queryClient.prefetchQuery({
-        queryKey: ["notes", { page, search, tag: tagForApi }],
-        queryFn: () => fetchNotes({ page, search, tag: tagForApi }),
+        queryKey: ['notes', { page, search, tag: tagForApi }],
+        queryFn: () => fetchNotes({ page, search, tag: tagForApi }, cookieStore.toString()),
     });
 
     return (
