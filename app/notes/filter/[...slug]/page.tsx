@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
-import type { NoteTag } from '@/types/note';
-import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { fetchNotes } from '@/lib/api/serverApi';
-import { cookies } from 'next/headers';
-import NotesClient from './Notes.client';
 import type { Metadata } from 'next';
+import type { NoteTag } from '@/types/note';
+
+import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query';
+import { cookies } from 'next/headers';
+
+import { fetchNotes } from '@/lib/api/serverApi';
+import NotesClient from './Notes.client';
 
 type Props = {
     params: Promise<{ slug: string[] }>;
@@ -15,18 +17,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!slug || slug.length !== 1) {
         return {
-            title: `Notes filter | NoteHub`,
-            description: "Notes filter page.",
+            title: 'Notes filter | NoteHub',
+            description: 'Notes filter page.',
             openGraph: {
-                title: `Notes filter | NoteHub`,
-                description: "Notes filter page.",
-                url: "https://08-zustand-nine-orcin.vercel.app/notes/filter/all",
+                title: 'Notes filter | NoteHub',
+                description: 'Notes filter page.',
+                url: 'https://09-auth-pi-umber.vercel.app/notes/filter/all',
                 images: [
                     {
-                        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+                        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
                         width: 1200,
                         height: 630,
-                        alt: "NoteHub",
+                        alt: 'NoteHub',
                     },
                 ],
             },
@@ -35,22 +37,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const current = slug[0];
 
-    const name = "NoteHub";
+    const name = 'NoteHub';
     const title = `Notes - ${current} | ${name}`;
     const description = `Browse your notes filtered by: ${current}.`;
 
     return {
-        title: title,
-        description: description,
+        title,
+        description,
         openGraph: {
-            title: title,
-            description: description,
-            url: `https://08-zustand-nine-orcin.vercel.app/notes/filter/${encodeURIComponent(
+            title,
+            description,
+            url: `https://09-auth-pi-umber.vercel.app/notes/filter/${encodeURIComponent(
                 current
             )}`,
             images: [
                 {
-                    url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+                    url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
                     width: 1200,
                     height: 630,
                     alt: name,
@@ -66,18 +68,27 @@ export default async function FilterPage({ params }: Props) {
     if (!slug || slug.length !== 1) notFound();
 
     const current = slug[0];
-
     const tagForApi = current === 'all' ? undefined : (current as NoteTag);
 
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+
+    const cookieHeader = [
+        accessToken ? `accessToken=${accessToken}` : '',
+        refreshToken ? `refreshToken=${refreshToken}` : '',
+    ]
+        .filter(Boolean)
+        .join('; ');
+
     const queryClient = new QueryClient();
+
     const page = 1;
     const search = '';
 
-    const cookieStore = cookies();
-
     await queryClient.prefetchQuery({
         queryKey: ['notes', { page, search, tag: tagForApi }],
-        queryFn: () => fetchNotes({ page, search, tag: tagForApi }, cookieStore.toString()),
+        queryFn: () => fetchNotes({ page, search, tag: tagForApi }, cookieHeader),
     });
 
     return (
@@ -86,3 +97,4 @@ export default async function FilterPage({ params }: Props) {
         </HydrationBoundary>
     );
 }
+

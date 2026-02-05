@@ -11,7 +11,13 @@ type NotePageProps = {
 export async function generateMetadata({ params }: NotePageProps):
   Promise<Metadata> {
   const { id } = await params;
-  const cookieHeader = cookies().toString();
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  const refreshToken = cookieStore.get('refreshToken')?.value;
+
+  const cookieHeader = [accessToken ? `accessToken=${accessToken}` : '', refreshToken ? `refreshToken=${refreshToken}` : '']
+    .filter(Boolean)
+    .join('; ');
   const note = await fetchNoteById(id, cookieHeader);
   const title = `Note: ${note.title}`;
   const description = (note.content ?? "").slice(0, 100);
@@ -22,7 +28,7 @@ export async function generateMetadata({ params }: NotePageProps):
     openGraph: {
       title,
       description,
-      url: `https://08-zustand-nine-orcin.vercel.app/notes/${id}`,
+      url: `https://09-auth-pi-umber.vercel.app/notes/${id}`,
       images: [
         {
           url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
@@ -43,7 +49,13 @@ export async function generateMetadata({ params }: NotePageProps):
 }
 export default async function NotePage({ params }: NotePageProps) {
   const { id } = await params;
-  const cookieHeader = cookies().toString();
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  const refreshToken = cookieStore.get('refreshToken')?.value;
+
+  const cookieHeader = [accessToken ? `accessToken=${accessToken}` : '', refreshToken ? `refreshToken=${refreshToken}` : '']
+    .filter(Boolean)
+    .join('; ');
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
