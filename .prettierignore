@@ -1,0 +1,20 @@
+# dependencies / builds
+node_modules
+.next
+out
+dist
+
+# env & cache
+.env*
+.vercel
+.turbo
+.cache
+
+# misc
+coverage
+*.log
+
+# lockfiles (можна форматити, але зазвичай не чіпають)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
