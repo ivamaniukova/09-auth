@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import type { NoteTag } from '@/types/note';
 
 import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import { cookies } from 'next/headers';
 
 import { fetchNotes } from '@/lib/api/serverApi';
 import NotesClient from './Notes.client';
@@ -70,17 +69,6 @@ export default async function FilterPage({ params }: Props) {
     const current = slug[0];
     const tagForApi = current === 'all' ? undefined : (current as NoteTag);
 
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
-    const refreshToken = cookieStore.get('refreshToken')?.value;
-
-    const cookieHeader = [
-        accessToken ? `accessToken=${accessToken}` : '',
-        refreshToken ? `refreshToken=${refreshToken}` : '',
-    ]
-        .filter(Boolean)
-        .join('; ');
-
     const queryClient = new QueryClient();
 
     const page = 1;
@@ -88,7 +76,7 @@ export default async function FilterPage({ params }: Props) {
 
     await queryClient.prefetchQuery({
         queryKey: ['notes', { page, search, tag: tagForApi }],
-        queryFn: () => fetchNotes({ page, search, tag: tagForApi }, cookieHeader),
+        queryFn: () => fetchNotes({ page, search, tag: tagForApi }),
     });
 
     return (

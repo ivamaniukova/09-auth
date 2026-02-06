@@ -1,9 +1,18 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Props = {
-    children: ReactNode;
+    children: React.ReactNode;
 };
 
-export default function AuthRoutesLayout({ children }: Props) {
+export default function AuthLayout({ children }: Props) {
+    const router = useRouter();
+
+    useEffect(() => {
+        router.refresh();
+    }, [router]);
+
     return <>{children}</>;
 }

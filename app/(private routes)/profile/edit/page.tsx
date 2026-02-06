@@ -1,15 +1,18 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 
 import css from './EditProfilePage.module.css';
 import { getMe, updateMe } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function EditProfilePage() {
     const router = useRouter();
+    const queryClient = useQueryClient();
+
+    const setUser = useAuthStore((s) => s.setUser);
+
     const [username, setUsername] = useState('');
 
     // 1️⃣ Отримуємо дані користувача
@@ -27,17 +30,21 @@ export default function EditProfilePage() {
     // 2️⃣ Оновлюємо дані користувача
     const mutation = useMutation({
         mutationFn: updateMe,
-        onSuccess: () => {
+        onSuccess: (updatedUser) => {
+            setUser(updatedUser);
+
+            queryClient.setQueryData(['me'], updatedUser);
+
             router.push('/profile');
         },
     });
 
     // submit форми
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         mutation.mutate({ username });
     };
-    // скасування редагування
+
     const handleCancel = () => {
         router.back();
     };
@@ -76,11 +83,7 @@ export default function EditProfilePage() {
                             Save
                         </button>
 
-                        <button
-                            type="button"
-                            className={css.cancelButton}
-                            onClick={handleCancel}
-                        >
+                        <button type="button" className={css.cancelButton} onClick={handleCancel}>
                             Cancel
                         </button>
                     </div>

@@ -50,7 +50,7 @@ export default function NotePreviewClient({ noteId }: Props) {
                 <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
                     <h3>Error loading note</h3>
                     <p>Could not load the note details. Please try again.</p>
-                    <button onClick={() => window.location.reload()}>Retry</button>
+                    <button onClick={() => router.refresh()}>Retry</button>
                 </div>
             </Modal>
         );

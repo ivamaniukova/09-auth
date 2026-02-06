@@ -2,7 +2,7 @@ import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query
 import NoteDetailsClient from "./NoteDetails.client";
 import { fetchNoteById } from "@/lib/api/serverApi";
 import { Metadata } from "next";
-import { cookies } from "next/headers";
+
 
 type NotePageProps = {
   params: Promise<{ id: string }>;
@@ -11,14 +11,8 @@ type NotePageProps = {
 export async function generateMetadata({ params }: NotePageProps):
   Promise<Metadata> {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
-  const refreshToken = cookieStore.get('refreshToken')?.value;
 
-  const cookieHeader = [accessToken ? `accessToken=${accessToken}` : '', refreshToken ? `refreshToken=${refreshToken}` : '']
-    .filter(Boolean)
-    .join('; ');
-  const note = await fetchNoteById(id, cookieHeader);
+  const note = await fetchNoteById(id);
   const title = `Note: ${note.title}`;
   const description = (note.content ?? "").slice(0, 100);
 
@@ -49,18 +43,12 @@ export async function generateMetadata({ params }: NotePageProps):
 }
 export default async function NotePage({ params }: NotePageProps) {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
-  const refreshToken = cookieStore.get('refreshToken')?.value;
 
-  const cookieHeader = [accessToken ? `accessToken=${accessToken}` : '', refreshToken ? `refreshToken=${refreshToken}` : '']
-    .filter(Boolean)
-    .join('; ');
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: ['note', id],
-    queryFn: () => fetchNoteById(id, cookieHeader),
+    queryFn: () => fetchNoteById(id),
   });
   return (<HydrationBoundary state={dehydrate(queryClient)}>
     <NoteDetailsClient />

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import css from './ProfilePage.module.css';
@@ -13,20 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-    const cookieStore = await cookies();
-
-    const accessToken = cookieStore.get('accessToken')?.value;
-    const refreshToken = cookieStore.get('refreshToken')?.value;
-
-    const cookieHeader = [
-        accessToken ? `accessToken=${accessToken}` : '',
-        refreshToken ? `refreshToken=${refreshToken}` : '',
-    ]
-        .filter(Boolean)
-        .join('; ');
 
     try {
-        const user = await getMe(cookieHeader);
+        const user = await getMe();
 
         return (
             <main className={css.mainContent}>
