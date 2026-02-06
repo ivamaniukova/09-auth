@@ -31,6 +31,11 @@ export default function AuthProvider({ children }: Props) {
         async function run() {
             setLoading(true);
 
+            if (!isPrivateRoute && !isAuthenticated) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const user = await checkSession();
 
